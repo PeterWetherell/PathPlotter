@@ -8,18 +8,22 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 
-public class main extends JPanel implements ActionListener{
+public class Main extends JPanel implements ActionListener{
 	JFrame frame;
 	Timer t;
 	
+	Field f;
+	
 	public static void main(String[] args) {
-		main drive = new main();
+		new Main();
 	}
 	
-	public main() {
+	public Main() {
 		frame = new JFrame("Path Plotter");
 		frame.setSize(900, 900);
 		frame.add(this);
+		
+		f = new Field();
 		
 		t = new Timer(5,this);
 		t.start();
@@ -32,7 +36,7 @@ public class main extends JPanel implements ActionListener{
 	public void paint(Graphics g) {
 		super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-		Field.drawField(g2, frame.getContentPane().getSize());
+		f.drawField(g2, frame.getContentPane().getSize());
 	}
 	
 	@Override

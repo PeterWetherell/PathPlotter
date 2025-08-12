@@ -1,7 +1,6 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 public class Field {
@@ -15,11 +14,51 @@ public class Field {
 		return (int)(x/(TILE_INTERLOCKING_EDGE_LENGTH + TILE_CENTER_WIDTH));
 	}
 	
-	public static void drawField(Graphics2D g2, Dimension dim) {
+	Robot r;
+	Spline s;
+	
+	public Field() {
+		r = new Robot(this, new Pose2d(48,24,0));
+	}
+	
+	int offset = 0;
+	double pixelPerInch = 0;
+	public int convertToPixels(double v) {
+		return offset + (int)((v + FEILD_LENGTH/2.0)*pixelPerInch);
+	}
+	
+	public void drawRectangle(Graphics2D g2, Pose2d p, double width, double heignt) {
+		double a = 1, b = 1, cos = Math.cos(p.heading), sin = Math.sin(p.heading);
+		for (int i = 0; i < 4; i ++) {
+			switch(i) {
+			case(0): 	a = 0.5; 	b = 0.5; 	break;
+			case(1): 	a = 0.5; 	b = -0.5;	break;
+			case(2): 	a = -0.5;	b = -0.5;	break;
+			case(3): 	a = -0.5;	b = 0.5; 	break;
+			}
+			drawLine(
+					g2,
+					new Pose2d(
+							p.x + a*heignt*cos - b*width*sin,
+							p.y + b*width*cos + a*heignt*sin
+					),
+					new Pose2d(
+							p.x - b*heignt*cos - a*width*sin,
+							p.y + a*width*cos - b*heignt*sin
+					)
+			);
+		}
+	}
+	
+	public void drawLine(Graphics2D g2, Pose2d p1, Pose2d p2) {
+		g2.drawLine(convertToPixels(-p1.y),convertToPixels(-p1.x),convertToPixels(-p2.y),convertToPixels(-p2.x));
+	}
+	
+	public void drawField(Graphics2D g2, Dimension dim) {
 		double x = dim.width;
 		double y = dim.height;
 		int maxSize = (int)Math.min(x, y);
-		int offset = (int)Math.min(maxSize * 0.2,10);
+		offset = (int)Math.min(maxSize * 0.2,10);
 		int size = maxSize - 2*offset;
 		g2.setColor(Color.GRAY);
 		g2.fillRect(offset, offset, size, size);
@@ -32,7 +71,7 @@ public class Field {
     	BasicStroke dotPattern1 = new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10f, dotPattern, 0f);
     	BasicStroke dotPattern2 = new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10f, dotPattern, 5f);
     	
-        double pixelPerInch = size/FEILD_LENGTH;
+        pixelPerInch = size/FEILD_LENGTH;
         for (int i = 1; i < NUM_TILES; i ++) {
         	double v = (i-NUM_TILES/2.0)*(TILE_INTERLOCKING_EDGE_LENGTH + TILE_CENTER_WIDTH); // Center of the line in inches
         	int l = (int)((FEILD_LENGTH/2.0 + v - TILE_INTERLOCKING_EDGE_LENGTH/2.0)*pixelPerInch); // Find the left side & convert to pixels
@@ -45,5 +84,8 @@ public class Field {
             g2.drawLine(offset+r, offset, offset+r, offset+size); // Vertical line
             g2.drawLine(offset, offset+r, offset+size, offset+r); // Horizontal
         }
+        
+        r.p.heading = 2*Math.PI*(System.currentTimeMillis()%5000)/5000;
+        r.update(g2);
 	}
 }
