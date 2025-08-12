@@ -1,3 +1,4 @@
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 class SplinePose2d extends Pose2d {
@@ -146,4 +147,5 @@ public class Spline {
         this.reversed = reversed;
         return this;
     }
+    
 }

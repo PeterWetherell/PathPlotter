@@ -17,8 +17,15 @@ public class Field {
 	Robot r;
 	Spline s;
 	
+	double elapsedTime;
+	long last;
+	
 	public Field() {
 		r = new Robot(this, new Pose2d(48,24,0));
+        s = new Spline(0, 0, 0, 3)
+        		.addPoint(40, 30, Math.PI/2)
+        		.addPoint(0,60,Math.PI);
+        last = System.nanoTime();
 	}
 	
 	int offset = 0;
@@ -55,6 +62,10 @@ public class Field {
 	}
 	
 	public void drawField(Graphics2D g2, Dimension dim) {
+        long start = System.nanoTime();
+        elapsedTime += (start - last)/1.0e9;
+        last = start;
+		
 		double x = dim.width;
 		double y = dim.height;
 		int maxSize = (int)Math.min(x, y);
@@ -85,7 +96,21 @@ public class Field {
             g2.drawLine(offset, offset+r, offset+size, offset+r); // Horizontal
         }
         
-        r.p.heading = 2*Math.PI*(System.currentTimeMillis()%5000)/5000;
+        double m = 4;
+        double t = (elapsedTime*m)%s.poses.size();
+        g2.setColor(Color.GREEN);
+		g2.setStroke(new BasicStroke(2f,BasicStroke.CAP_SQUARE,BasicStroke.JOIN_MITER,10f));
+        for (int i = (int)t+1; i < s.poses.size()-1; i ++) {
+        	drawLine(g2,s.poses.get(i),s.poses.get(i+1));
+        }
+        double k = t - (int)t;
+        r.p = s.poses.get((int)t).clone();
+        if ((int)t < s.poses.size()-1) {
+        	Pose2d next = s.poses.get((int)t + 1);
+        	r.p.x += (next.x - r.p.x)*k;
+        	r.p.y += (next.y - r.p.y)*k;
+        	r.p.heading += AngleUtil.clipAngle(next.heading - r.p.heading)*k;
+        }
         r.update(g2);
 	}
 }
