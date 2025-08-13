@@ -22,9 +22,16 @@ public class Field {
 	
 	public Field() {
 		r = new Robot(this, new Pose2d(48,24,0));
-        s = new Spline(0, 0, 0, 3)
-        		.addPoint(40, 30, Math.PI/2)
-        		.addPoint(0,60,Math.PI);
+        s = new Spline(0, -30, 0, 3)
+        		.addPoint(30, 0, Math.PI/2)
+        		.addPoint(0,30,Math.PI)
+				.addPoint(-30, 0, -Math.PI/2)
+				.addPoint(0, -30, 0)
+				.setReversed(true)
+				.addPoint(-30, 0, -Math.PI/2)
+        		.addPoint(0,30,Math.PI)
+        		.addPoint(30, 0, Math.PI/2)
+				.addPoint(0, -30, 0);
         last = System.nanoTime();
 	}
 	
